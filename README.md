@@ -239,6 +239,64 @@ mode:
     schedule: "rate(1 day)"
 ```
 
+### Notify Slack
+
+To integrate Cloud Custodian to notify a Slack channel:
+
+1- Install `c7n-nailer`
+2- Obtain Slack webhook.
+3- Create SQS.
+4- Create `mailer.yml` file and add the following to the file:
+
+``` yml
+queue_url: https://sqs.us-east-1.amazonaws.com/XXXXXXX/CloudCustodian_Role
+role: arn:aws:iam::XXXXXXX:role/CloudCustodian_Role
+region: us-east-1
+```
+5- Run the following command to create a mailer lambda and eventbridge (default 5 mins):
+
+``` bash
+c7n-mailer --config mailer.yaml --update-lambda
+```
+6- Add the following `notify` to the `actions` section of the policy:
+
+``` yml
+    actions:
+      - type: notify
+        slack_template: slack_default
+        slack_msg_color: danger
+        violation_desc: No action taken.
+        action_desc: No action taken. 
+        to:
+          - https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXXX
+        transport:
+          type: sqs
+          queue: https://sqs.us-east-1.amazonaws.com/XXXXXXXXXXXXX/CloudCustodian_Role
+```
+
+7- Finally, deploy the updated policy:
+
+``` bash
+custodian run -s . policy.yml
+```
+
+Note: if region is requested, add `--region us-east-1` to the above command. 
+
+8- (Optional) create a customized slack template and change the action section:
+actions:
+
+``` yml
+actions:
+    - type: notify
+      slack_template: your_custom_slack_template_name
+```
+9- Update the mailer lambda:
+
+``` bash
+c7n-mailer --config mailer.yml -t templates --update-lambda 
+```
+
+
 
 Additional Tools
 ----------------
