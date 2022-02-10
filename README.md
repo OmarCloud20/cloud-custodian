@@ -67,7 +67,7 @@ custodian schema [resourceName]
 for example:
 
 ``` bash
-custodian schema EC2
+custodian schema ec2
 ```
 
 will list the filters and actions available for EC2. For details on a specific action or filter, the format is:
@@ -79,30 +79,13 @@ custodian schema [resourceName].[actions or filters].[action or filter name]
 for example:
 
 ``` bash
-custodian schema EC2.filters.instance-age
+custodian schema ec2.filters.instance-age
 ```
 
 ### Configure the IAM role
 
 Before running the policy, you'll need to give the resulting Lambda function the permissions required. Use the IAM policy provided for each Cloud Custodian policy file as a starting place: create the policy, attach it to a new role, and update the Cloud Custodian policy with the ARN of that role.
 
-### Validate the policies
-
-Once you've updated your policies, you'll want to run the Cloud Custodian validator to check the file for errors:
-
-``` bash
-custodian validate policy.yml
-```
-
-### Dry-run the policies
-
-It's a good idea to "dry-run" policies before actually deploying them. A "dry-run" will query the AWS API for resources that match the given filters, then save those resources in a `resources.json` file for each policy.
-
-``` bash
-custodian run --dryrun -s output policy.yml
-```
-
-The `--dryrun` option ensures that no actions are taken, while the `-s` option specifies the path for output files (in this case, the output directory). Each policy will have its own subdirectory containing the output files. In this example, the resources selected by a policy named `ec2-terminate-old-instances` would be contained in `output/ec2-terminate-old-instances/resources.json`.
 
 ### Deploy the policies
 
